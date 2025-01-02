@@ -61,6 +61,11 @@
       - svelte.svelte-vscode
       - redhat.vscode-yaml
   tasks:
+    - name: Ensure .zshrc exists
+      ansible.builtin.file:
+        path: ~/.zshrc
+        state: touch
+
     - name: Append custom configurations to .zshrc
       ansible.builtin.blockinfile:
         path: ~/.zshrc
