@@ -26,8 +26,6 @@
       - { name: "ClickHouse", cask: "clickhouse" }
       - { name: "Ghostty", cask: "ghostty" }
       - { name: "Google Cloud SDK", cask: "google-cloud-sdk" }
-      - { name: "MediaInfo", cask: "mediainfo" }
-      - { name: "Multipass", cask: "multipass" }
       - { name: "ngrok", cask: "ngrok" }
 
     ai_tool_casks:
