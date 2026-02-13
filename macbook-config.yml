@@ -23,7 +23,6 @@
       - { name: "DBeaver Community Edition", cask: "dbeaver-community" }
       - { name: "Rectangle", cask: "rectangle" }
       - { name: "Raycast", cask: "raycast" }
-      - { name: "Anaconda", cask: "anaconda" }
       - { name: "ClickHouse", cask: "clickhouse" }
       - { name: "Ghostty", cask: "ghostty" }
       - { name: "Google Cloud SDK", cask: "google-cloud-sdk" }
