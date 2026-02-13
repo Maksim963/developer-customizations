@@ -5,7 +5,6 @@
 
   vars:
     brew_packages:
-      - docker
       - miniconda
       - rustup-init
       - go
@@ -20,7 +19,6 @@
       - scmpuff
 
     cask_apps:
-      - { name: "Docker", cask: "docker" }
       - { name: "MiddleClick", cask: "middleclick" }
       - { name: "DBeaver Community Edition", cask: "dbeaver-community" }
       - { name: "Rectangle", cask: "rectangle" }
