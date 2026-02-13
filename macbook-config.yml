@@ -10,7 +10,6 @@
       - rustup-init
       - go
       - opencode
-      - dotnet-sdk
       - ocaml
       - opam
       - terraform
