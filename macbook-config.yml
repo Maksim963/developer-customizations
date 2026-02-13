@@ -24,7 +24,7 @@
       - { name: "Rectangle", cask: "rectangle" }
       - { name: "Raycast", cask: "raycast" }
       - { name: "ClickHouse", cask: "clickhouse" }
-      - { namef: "Ghostty", cask: "ghostty" }
+      - { name: "Ghostty", cask: "ghostty" }
       - { name: "Google Cloud SDK", cask: "google-cloud-sdk" }
       - { name: "ngrok", cask: "ngrok" }
 
@@ -166,6 +166,14 @@
       community.general.homebrew:
         name: "{{ brew_packages }}"
         state: present
+
+    - name: Validate cask entries shape
+      ansible.builtin.assert:
+        that:
+          - item.name is defined
+          - item.cask is defined
+        fail_msg: "Each cask_apps item must include both 'name' and 'cask'. Bad item: {{ item }}"
+      loop: "{{ cask_apps }}"
 
     - name: Check for existing cask applications
       ansible.builtin.stat:
