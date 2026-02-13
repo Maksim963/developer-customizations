@@ -1,9 +1,6 @@
 # Customizations
 
-*my pre-'I use Arch btw' era*
-
-### Summary
-This project was built to ensure a consistent baseline setup for my different computers and environments.
+Updated whenever I get a new computer. 
 
 ### Installation
 
