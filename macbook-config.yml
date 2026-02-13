@@ -65,7 +65,6 @@
         - { domain: "NSGlobalDomain", key: "NSAutomaticPeriodSubstitutionEnabled", type: "bool", value: true }
 
     cursor_extensions:
-      - 1yib.rust-bundle
       - 4ops.terraform
       - alefragnani.bookmarks
       - anthropic.claude-code
