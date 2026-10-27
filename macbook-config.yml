@@ -9,9 +9,6 @@
       private: true
 
   vars:
-    brew_taps:
-      - hookdeck/hookdeck
-
     brew_packages:
       - rustup
       - go
@@ -45,7 +42,6 @@
       - watch
       - displayplacer
       - gemini-cli
-      - hookdeck/hookdeck/hookdeck
 
     cask_apps:
       - { name: "MiddleClick", cask: "middleclick" }
@@ -220,11 +216,6 @@
         block: "{{ lookup('file', 'config/zshrc-appends.sh') }}"
         marker: "# {mark} ANSIBLE MANAGED BLOCK - Custom commands"
         insertafter: EOF
-
-    - name: Add Homebrew taps
-      community.general.homebrew_tap:
-        name: "{{ brew_taps }}"
-        state: present
 
     - name: Install Homebrew packages
       community.general.homebrew:
