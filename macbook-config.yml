@@ -3,6 +3,11 @@
   hosts: localhost
   become: no
 
+  vars_prompt:
+    - name: macos_password
+      prompt: "macOS password (some cask installers need sudo; leave empty to skip)"
+      private: true
+
   vars:
     brew_taps:
       - hookdeck/hookdeck
@@ -68,15 +73,24 @@
       - { name: "CleanShot X", cask: "cleanshot" }
       - { name: "Tailscale", cask: "tailscale-app" }
       - { name: "UTM", cask: "utm" }
+      - { name: "Cursor", cask: "cursor" }
+      - { name: "Claude", cask: "claude" }
+      - { name: "ChatGPT", cask: "chatgpt" }
+      - { name: "Conductor", cask: "conductor" }
+      - { name: "Codex", cask: "codex-app" }
+      - { name: "OpenCode", cask: "opencode-desktop" }
 
     ai_tool_casks:
-      - claude
       - claude-code@latest
-      - chatgpt
-      - conductor
       - codex
-      - codex-app
-      - opencode-desktop
+      - cursor-cli
+
+    login_items:
+      - MiddleClick
+      - Rectangle
+      - Raycast
+
+    cursor_cli: /Applications/Cursor.app/Contents/Resources/app/bin/cursor
 
     raycast_defaults:
       global_hotkey: "Command-49"
@@ -238,6 +252,7 @@
         name: "{{ item.item.cask }}"
         state: present
         greedy: false
+        sudo_password: "{{ macos_password if macos_password else omit }}"
       when: not item.stat.exists
       loop: "{{ app_check.results }}"
       register: cask_install_result
@@ -247,6 +262,7 @@
         name: "{{ item }}"
         state: present
         greedy: false
+        sudo_password: "{{ macos_password if macos_password else omit }}"
       loop: "{{ ai_tool_casks }}"
 
     - name: Configure Raycast global hotkey
@@ -368,10 +384,16 @@
         line: "export PATH=$PATH:$HOME/.cargo/bin"
         state: present
 
+    - name: Initialize opam
+      ansible.builtin.command: opam init -y --no-setup
+      args:
+        creates: ~/.opam
+
     - name: Add OCaml opam to .zshrc
       ansible.builtin.lineinfile:
         path: ~/.zshrc
-        line: "eval $(opam env)"
+        regexp: 'eval \$\(opam env\)$'
+        line: '[ -d "$HOME/.opam" ] && eval $(opam env)'
         state: present
 
     ##################################################
@@ -428,54 +450,39 @@
     ##################################################
 
     - name: Configure middleclick for tap to click
-      ansible.builtin.command: defaults write com.matthewlunsford.MiddleClick TapToClick -bool true
-      register: middleclick_config
-      changed_when: middleclick_config.rc != 0
+      community.general.osx_defaults:
+        domain: com.matthewlunsford.MiddleClick
+        key: TapToClick
+        type: bool
+        value: true
 
-    - name: Add MiddleClick to login items
-      ansible.builtin.shell: |
-        osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/MiddleClick.app", hidden:false}'
-      register: add_login_item
-      changed_when: add_login_item.rc != 0
-      failed_when: add_login_item.rc != 0 and "already exists" not in add_login_item.stderr
-
-    - name: Add Rectangle to login items
-      ansible.builtin.shell: |
-        osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/Rectangle.app", hidden:false}'
-      register: add_rectangle_login_item
-      changed_when: add_rectangle_login_item.rc != 0
-      failed_when: add_rectangle_login_item.rc != 0 and "already exists" not in add_rectangle_login_item.stderr
-
-    - name: Add Raycast to login items
-      ansible.builtin.shell: |
-        osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/Raycast.app", hidden:false}'
-      register: add_raycast_login_item
-      changed_when: add_raycast_login_item.rc != 0
-      failed_when: add_raycast_login_item.rc != 0 and "already exists" not in add_raycast_login_item.stderr
+    # The first run triggers a macOS prompt to let the terminal control System Events.
+    - name: Add login items
+      ansible.builtin.command:
+        argv:
+          - osascript
+          - -e
+          - |
+            tell application "System Events"
+              if exists login item "{{ item }}" then return "present"
+              make login item at end with properties {path:"/Applications/{{ item }}.app", hidden:false}
+              return "added"
+            end tell
+      loop: "{{ login_items }}"
+      register: login_item_result
+      changed_when: login_item_result.stdout == "added"
 
     ##################################################
     #                Cursor IDE Setup                #
     ##################################################
 
-    - name: Check if Cursor is installed
-      ansible.builtin.command: cursor -v
-      register: cursor_version
-      ignore_errors: yes
-      changed_when: false
-
-    - name: Install Cursor if not present
-      community.general.homebrew_cask:
-        name: cursor
-        state: present
-      when: cursor_version.rc != 0
-
     - name: Get list of installed Cursor extensions
-      ansible.builtin.command: cursor --list-extensions
+      ansible.builtin.command: "{{ cursor_cli }} --list-extensions"
       register: installed_extensions
       changed_when: false
 
     - name: Install Cursor extensions
-      ansible.builtin.command: cursor --install-extension {{ item }}
+      ansible.builtin.command: "{{ cursor_cli }} --install-extension {{ item }}"
       loop: "{{ cursor_extensions }}"
       when: item not in installed_extensions.stdout_lines
       ignore_errors: yes
