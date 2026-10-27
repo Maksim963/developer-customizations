@@ -11,7 +11,6 @@
   vars:
     brew_taps:
       - hookdeck/hookdeck
-      - porter-dev/porter
 
     brew_packages:
       - rustup
@@ -47,7 +46,6 @@
       - displayplacer
       - gemini-cli
       - hookdeck/hookdeck/hookdeck
-      - porter-dev/porter/porter
 
     cask_apps:
       - { name: "MiddleClick", cask: "middleclick" }
