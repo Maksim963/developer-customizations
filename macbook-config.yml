@@ -521,3 +521,67 @@
         src: "config/cursor-keybindings.json"
         dest: "~/Library/Application Support/Cursor/User/keybindings.json"
         mode: "0644"
+
+    ##################################################
+    #              AI Agent Configs                  #
+    ##################################################
+    # App-managed configs (settings.json, config.toml, cli-config.json, mcp.json)
+    # are only seeded when missing so re-runs don't clobber app-written state.
+
+    - name: Ensure agent config directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - ~/.claude/commands
+        - ~/.codex
+        - ~/.cursor
+
+    - name: Seed Claude Code settings
+      ansible.builtin.copy:
+        src: config/claude/settings.json
+        dest: ~/.claude/settings.json
+        mode: "0644"
+        force: false
+
+    - name: Copy Claude Code CLAUDE.md
+      ansible.builtin.copy:
+        src: config/claude/CLAUDE.md
+        dest: ~/.claude/CLAUDE.md
+        mode: "0644"
+
+    - name: Copy Claude Code commands
+      ansible.builtin.copy:
+        src: config/claude/commands/
+        dest: ~/.claude/commands/
+        mode: "0644"
+
+    - name: Seed Codex config
+      ansible.builtin.template:
+        src: config/codex/config.toml.j2
+        dest: ~/.codex/config.toml
+        mode: "0600"
+        force: false
+
+    - name: Add personal defaults to Codex AGENTS.md
+      ansible.builtin.blockinfile:
+        path: ~/.codex/AGENTS.md
+        create: true
+        block: "{{ lookup('file', 'config/codex/AGENTS.md') }}"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - Personal defaults"
+        insertafter: EOF
+
+    - name: Seed Cursor agent CLI config
+      ansible.builtin.copy:
+        src: config/cursor-agent/cli-config.json
+        dest: ~/.cursor/cli-config.json
+        mode: "0644"
+        force: false
+
+    - name: Seed Cursor MCP servers
+      ansible.builtin.copy:
+        src: config/cursor-agent/mcp.json
+        dest: ~/.cursor/mcp.json
+        mode: "0600"
+        force: false

@@ -1,0 +1,95 @@
+model = "gpt-6.1-sol"
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "xhigh"
+service_tier = "default"
+personality = "pragmatic"
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+[mcp_servers.bag-of-tools]
+command = "{{ ansible_env.HOME }}/.local/bin/bot"
+args = ["mcp"]
+
+[mcp_servers.bag-of-tools.env]
+PATH = "{{ ansible_env.HOME }}/.local/bin:/opt/homebrew/bin:/opt/homebrew/opt/libpq/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+[marketplaces.posthog]
+source_type = "git"
+source = "https://github.com/PostHog/ai-plugin.git"
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."granola@openai-curated"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."slack@openai-curated"]
+enabled = true
+
+[plugins."notion@openai-curated"]
+enabled = true
+
+[plugins."linear@openai-curated"]
+enabled = true
+
+[plugins."statsig@openai-curated"]
+enabled = true
+
+[plugins."gmail@openai-curated"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."codex-app-tools@openai-bundled"]
+enabled = true
+
+[plugins."unified-computer-use@openai-bundled"]
+enabled = true
+
+[features]
+hooks = true
+memories = true
+goals = true
+prevent_idle_sleep = true
+js_repl = false
+
+[memories]
+use_memories = false
+generate_memories = false
+
+[desktop]
+followUpQueueMode = "steer"
+git-branch-prefix = "max/"
+git-create-pull-request-as-draft = false
+git-pull-request-merge-method = "squash"
+git-show-sidebar-pr-icons = true
+default-service-tier = "priority"
+dock-icon-preference = "codex-system"
+conversationDetailMode = "STEPS_COMMANDS"
+show-context-window-usage = true
+
+[desktop.open-in-target-preferences]
+global = "ghostty"
