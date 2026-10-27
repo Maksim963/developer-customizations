@@ -12,6 +12,7 @@ export CONDA_CHANGEPS1=false
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
 
 # Set name of the theme to load (using custom prompt instead)
 # ZSH_THEME="refined"
@@ -110,10 +111,36 @@ alias gswit="git switch"
 
 eval "$(zoxide init zsh)"
 fpath=(~/.zsh/completion $fpath)
-autoload -U compinit && compinit
 
 alias cl=clear
 alias timeout=gtimeout
+alias tf=terraform
+
+# Rust (Homebrew's rustup is keg-only)
+export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+# Postgres client tools (psql, pg_dump)
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+export PATH="$HOME/.local/bin:$PATH"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+
+export PATH="$HOME/.opencode/bin:$PATH"
+
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
 
 #  ╔════════════════════════════════════════════════════════════════════════════╗
 #  ║                 ███████╗██╗███╗   ██╗                                      ║

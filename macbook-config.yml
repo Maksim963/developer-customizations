@@ -4,32 +4,76 @@
   become: no
 
   vars:
+    brew_taps:
+      - hookdeck/hookdeck
+      - porter-dev/porter
+
     brew_packages:
-      - miniconda
-      - rustup-init
+      - rustup
       - go
       - opencode
       - ocaml
       - opam
-      - terraform
+      - tfenv
       - zsh-autocomplete
       - awscli
       - dune
       - llvm
       - scmpuff
+      - fzf
+      - zoxide
+      - neovim
+      - coreutils
+      - gh
+      - git-lfs
+      - docker
+      - helm
+      - deno
+      - nvm
+      - libpq
+      - poetry
+      - python@3.11
+      - openjdk@21
+      - ffmpeg
+      - poppler
+      - mkcert
+      - trufflehog
+      - watch
+      - displayplacer
+      - gemini-cli
+      - hookdeck/hookdeck/hookdeck
+      - porter-dev/porter/porter
 
     cask_apps:
       - { name: "MiddleClick", cask: "middleclick" }
-      - { name: "DBeaver Community Edition", cask: "dbeaver-community" }
+      - { name: "DBeaver", cask: "dbeaver-community" }
       - { name: "Rectangle", cask: "rectangle" }
       - { name: "Raycast", cask: "raycast" }
       - { name: "ClickHouse", cask: "clickhouse" }
       - { name: "Ghostty", cask: "ghostty" }
-      - { name: "Google Cloud SDK", cask: "google-cloud-sdk" }
       - { name: "ngrok", cask: "ngrok" }
+      - { name: "Miniconda", cask: "miniconda" }
+      - { name: "MediaInfo", cask: "mediainfo" }
+      - { name: "mitmproxy", cask: "mitmproxy" }
+      - { name: "Session Manager Plugin", cask: "session-manager-plugin" }
+      - { name: "Docker", cask: "docker-desktop" }
+      - { name: "1Password", cask: "1password" }
+      - { name: "Google Chrome", cask: "google-chrome" }
+      - { name: "Slack", cask: "slack" }
+      - { name: "Notion", cask: "notion" }
+      - { name: "Obsidian", cask: "obsidian" }
+      - { name: "Granola", cask: "granola" }
+      - { name: "Superhuman", cask: "superhuman" }
+      - { name: "Spotify", cask: "spotify" }
+      - { name: "CleanShot X", cask: "cleanshot" }
+      - { name: "Tailscale", cask: "tailscale-app" }
+      - { name: "UTM", cask: "utm" }
 
     ai_tool_casks:
-      - claude-code
+      - claude
+      - claude-code@latest
+      - chatgpt
+      - conductor
       - codex
       - codex-app
       - opencode-desktop
@@ -55,7 +99,8 @@
         - { domain: "com.apple.driver.AppleBluetoothMultitouch.trackpad", key: "Clicking", type: "int", value: 0 }
         - { domain: "com.apple.AppleMultitouchTrackpad", key: "TrackpadRightClick", type: "int", value: 1 }
         - { domain: "com.apple.driver.AppleBluetoothMultitouch.trackpad", key: "TrackpadRightClick", type: "int", value: 1 }
-        - { domain: "NSGlobalDomain", key: "com.apple.mouse.scaling", type: "float", value: 0.875 }
+        - { domain: "NSGlobalDomain", key: "com.apple.mouse.scaling", type: "float", value: 1 }
+        - { domain: "NSGlobalDomain", key: "com.apple.trackpad.scaling", type: "float", value: 0.6875 }
         - { domain: "NSGlobalDomain", key: "com.apple.swipescrolldirection", type: "int", value: 0 }
         - { domain: "com.apple.AppleMultitouchTrackpad", key: "TrackpadThreeFingerDrag", type: "int", value: 0 }
         - { domain: "com.apple.driver.AppleBluetoothMultitouch.trackpad", key: "TrackpadThreeFingerDrag", type: "int", value: 0 }
@@ -63,6 +108,12 @@
         - { domain: "NSGlobalDomain", key: "NSAutomaticSpellingCorrectionEnabled", type: "bool", value: false }
         - { domain: "NSGlobalDomain", key: "NSAutomaticCapitalizationEnabled", type: "bool", value: false }
         - { domain: "NSGlobalDomain", key: "NSAutomaticPeriodSubstitutionEnabled", type: "bool", value: true }
+      appearance:
+        - { domain: "NSGlobalDomain", key: "AppleInterfaceStyle", type: "string", value: "Dark" }
+      rectangle:
+        - { domain: "com.knollsoft.Rectangle", key: "alternateDefaultShortcuts", type: "bool", value: true }
+        - { domain: "com.knollsoft.Rectangle", key: "allowAnyShortcut", type: "bool", value: true }
+        - { domain: "com.knollsoft.Rectangle", key: "subsequentExecutionMode", type: "int", value: 1 }
 
     cursor_extensions:
       - 4ops.terraform
@@ -149,6 +200,21 @@
       - zxh404.vscode-proto3
 
   tasks:
+    - name: Install oh-my-zsh
+      ansible.builtin.git:
+        repo: https://github.com/ohmyzsh/ohmyzsh.git
+        dest: ~/.oh-my-zsh
+        update: no
+
+    - name: Install oh-my-zsh custom plugins
+      ansible.builtin.git:
+        repo: "https://github.com/zsh-users/{{ item }}.git"
+        dest: "~/.oh-my-zsh/custom/plugins/{{ item }}"
+        update: no
+      loop:
+        - zsh-autosuggestions
+        - zsh-syntax-highlighting
+
     - name: Ensure .zshrc exists
       ansible.builtin.file:
         path: ~/.zshrc
@@ -160,6 +226,11 @@
         block: "{{ lookup('file', 'config/zshrc-appends.sh') }}"
         marker: "# {mark} ANSIBLE MANAGED BLOCK - Custom commands"
         insertafter: EOF
+
+    - name: Add Homebrew taps
+      community.general.homebrew_tap:
+        name: "{{ brew_taps }}"
+        state: present
 
     - name: Install Homebrew packages
       community.general.homebrew:
@@ -260,6 +331,22 @@
         value: "{{ item.value }}"
       loop: "{{ macos_defaults.keyboard }}"
 
+    - name: Apply appearance defaults
+      community.general.osx_defaults:
+        domain: "{{ item.domain }}"
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      loop: "{{ macos_defaults.appearance }}"
+
+    - name: Apply Rectangle defaults
+      community.general.osx_defaults:
+        domain: "{{ item.domain }}"
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      loop: "{{ macos_defaults.rectangle }}"
+
     - name: Disable Spotlight keyboard shortcuts
       ansible.builtin.shell: defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add {{ item.id }} "{{ item.value }}"
       args:
@@ -288,10 +375,10 @@
     #            Languages Setup                     #
     ##################################################
 
-    - name: Initialize rustup
-      ansible.builtin.command: rustup-init -y --no-modify-path
+    - name: Install stable Rust toolchain
+      ansible.builtin.command: /opt/homebrew/opt/rustup/bin/rustup default stable
       args:
-        creates: ~/.cargo/bin/rustc
+        creates: ~/.rustup/toolchains
 
     - name: Add Rust to PATH in .zshrc
       ansible.builtin.lineinfile:
@@ -309,23 +396,50 @@
     #            Cloud Tools Setup                   #
     ##################################################
 
-    - name: Add Google Cloud SDK to .zshrc
+    - name: Remove Google Cloud SDK block from .zshrc
       ansible.builtin.blockinfile:
         path: ~/.zshrc
-        block: |
-          # The next line updates PATH for the Google Cloud SDK.
-          if [ -f '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc' ]; then . '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc'; fi
-
-          # The next line enables shell command completion for gcloud.
-          if [ -f '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc' ]; then . '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc'; fi
         marker: "# {mark} ANSIBLE MANAGED BLOCK - Google Cloud SDK"
-        state: present
+        state: absent
 
     - name: Add AWS CLI shell completion to .zshrc
       ansible.builtin.lineinfile:
         path: ~/.zshrc
-        line: 'complete -C "/usr/local/bin/aws_completer" aws'
+        regexp: 'aws_completer" aws$'
+        line: 'complete -C "/opt/homebrew/bin/aws_completer" aws'
         state: present
+
+    - name: Ensure nvm directory exists
+      ansible.builtin.file:
+        path: ~/.nvm
+        state: directory
+        mode: "0755"
+
+    ##################################################
+    #                    Git                         #
+    ##################################################
+
+    - name: Set git user name
+      community.general.git_config:
+        name: user.name
+        scope: global
+        value: Max Yarmakovich
+
+    - name: Install git-lfs filters
+      ansible.builtin.command: git lfs install --skip-repo
+      changed_when: false
+
+    - name: Ensure global git config directory exists
+      ansible.builtin.file:
+        path: ~/.config/git
+        state: directory
+        mode: "0755"
+
+    - name: Copy global gitignore
+      ansible.builtin.copy:
+        src: config/git-ignore
+        dest: ~/.config/git/ignore
+        mode: "0644"
 
     ##################################################
     #            Productivity tools                  #
@@ -349,6 +463,13 @@
       register: add_rectangle_login_item
       changed_when: add_rectangle_login_item.rc != 0
       failed_when: add_rectangle_login_item.rc != 0 and "already exists" not in add_rectangle_login_item.stderr
+
+    - name: Add Raycast to login items
+      ansible.builtin.shell: |
+        osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/Raycast.app", hidden:false}'
+      register: add_raycast_login_item
+      changed_when: add_raycast_login_item.rc != 0
+      failed_when: add_raycast_login_item.rc != 0 and "already exists" not in add_raycast_login_item.stderr
 
     ##################################################
     #                Cursor IDE Setup                #
@@ -394,3 +515,9 @@
         dest: "~/Library/Application Support/Cursor/User/settings.json"
         mode: "0644"
       when: custom_settings.stat.exists
+
+    - name: Copy Cursor keybindings
+      ansible.builtin.copy:
+        src: "config/cursor-keybindings.json"
+        dest: "~/Library/Application Support/Cursor/User/keybindings.json"
+        mode: "0644"
