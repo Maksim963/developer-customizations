@@ -189,6 +189,15 @@
       - ziglang.vscode-zig
       - zxh404.vscode-proto3
 
+  pre_tasks:
+    - name: Refuse to run as root
+      ansible.builtin.assert:
+        that: ansible_user_uid != 0
+        fail_msg: >-
+          Don't run this playbook with sudo: Homebrew refuses to run as root and files would end up
+          owned by root. Run `ansible-playbook macbook-config.yml` as your user; it prompts for the
+          password that cask installers need.
+
   tasks:
     - name: Install oh-my-zsh
       ansible.builtin.git:
