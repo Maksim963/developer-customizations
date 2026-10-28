@@ -73,6 +73,7 @@
       - { name: "Conductor", cask: "conductor" }
       - { name: "Codex", cask: "codex-app" }
       - { name: "OpenCode", cask: "opencode-desktop" }
+      - { name: "Grok Bot", cask: "grok-bot" }
 
     ai_tool_casks:
       - claude-code@latest
